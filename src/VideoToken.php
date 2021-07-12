@@ -59,7 +59,7 @@ final class VideoToken
 		}
 		if ($this->provider === self::PROVIDER_VIMEO) {
 			$api = trim(
-				(string)@file_get_contents(
+				(string) @file_get_contents(
 					'https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/' . urlencode($this->token)
 				)
 			);
@@ -90,11 +90,13 @@ final class VideoToken
 		if (preg_match('/^[a-zA-Z0-9\-_]{11}$/', $url) === 1) { // 2.
 			return $url;
 		}
-		if (preg_match(
+		if (
+			preg_match(
 				'/^(?:watch\?v=|v\/|embed\/|ytscreeningroom\?v=|\?v=|\?vi=|e\/|watch\?.*vi?=|\?feature=[a-z_]*&v=|vi\/)([a-zA-Z0-9\-_]{11})/',
 				$url,
 				$regularMatch
-			) === 1) { // 3.
+			) === 1
+		) { // 3.
 			return $regularMatch[1] ?? null;
 		}
 		if (preg_match('/^([a-zA-Z0-9\-_]{11})(?:\?[a-z]|&[a-z])/', $url, $organicParametersMatch) === 1) { // 4.
@@ -123,27 +125,31 @@ final class VideoToken
 		$parsedProvider = null;
 
 		if (preg_match('/^(?:https?:\/\/|\/\/)(?:www\.)?(.+)$/', $token, $urlParser) === 1) { // URL
-			if (preg_match(
+			if (
+				preg_match(
 					'/^(?:youtube\.com|youtu\.be|youtube-nocookie\.com|yt\.be)\/(.+)$/',
 					$urlParser[1],
 					$youTubeParser,
-				) === 1) {
+				) === 1
+			) {
 				$parsedProvider = self::PROVIDER_YOUTUBE;
 				$parsedToken = self::parseYouTubeTokenByUrl($youTubeParser[1] ?? '');
-			} elseif (preg_match(
+			} elseif (
+				preg_match(
 					'/(?:(?:player\.)?vimeo\.com\/(?:video\/)?)?(?<token>\d{8})/',
 					$urlParser[1],
 					$vimeoParser,
-				) === 1) {
+				) === 1
+			) {
 				$parsedProvider = self::PROVIDER_VIMEO;
-				$parsedToken = (string)$vimeoParser['token'];
+				$parsedToken = (string) $vimeoParser['token'];
 			} else {
 				throw new \InvalidArgumentException('Token or URL "' . $token . '" is invalid.');
 			}
 		}
 		if (preg_match('/embed\/([a-zA-Z0-9\-_]{11})"/', $token, $youTubeEmbed) === 1) {
 			$parsedProvider = self::PROVIDER_YOUTUBE;
-			$parsedToken = (string)$youTubeEmbed[1];
+			$parsedToken = (string) $youTubeEmbed[1];
 		}
 		if ($parsedProvider !== null && $parsedToken === null) { // Invalid input
 			throw new \InvalidArgumentException('Token can not be parser for "' . $parsedProvider . '" provider.');
