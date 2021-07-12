@@ -1,7 +1,7 @@
 {
-	"name": "baraja-core/template",
-	"description": "This is a template package.",
-	"homepage": "https://github.com/baraja-core/template",
+	"name": "baraja-core/video-token",
+	"description": "Parse video token from user string or URL.",
+	"homepage": "https://github.com/baraja-core/video-token",
 	"authors": [
 		{
 			"name": "Jan Barášek",
