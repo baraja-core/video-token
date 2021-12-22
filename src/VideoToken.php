@@ -58,12 +58,10 @@ final class VideoToken
 			return 'https://img.youtube.com/vi/' . urlencode($this->token) . '/maxresdefault.jpg';
 		}
 		if ($this->provider === self::PROVIDER_VIMEO) {
-			$url = 'https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/' . urlencode($this->token);
-			$api = trim((string) @file_get_contents($url));
-			$apiResponse = json_decode($api, true, 512, JSON_THROW_ON_ERROR);
-			$thumbnailUrl = is_array($apiResponse) && isset($apiResponse['thumbnail_url']) ? $apiResponse['thumbnail_url'] : null;
-			if (is_string($thumbnailUrl)) {
-				return $thumbnailUrl;
+			try {
+				return $this->downloadVimeoThumbnail($this->token);
+			} catch (\Throwable $e) {
+				trigger_error(sprintf('Can not download Vimeo thumbnail: %s', $e->getMessage()));
 			}
 		}
 
@@ -184,5 +182,16 @@ final class VideoToken
 		}
 
 		return null;
+	}
+
+	private function downloadVimeoThumbnail(string $token): ?string
+	{
+		$url = 'https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/' . urlencode($token);
+		$api = trim((string) @file_get_contents($url));
+		$apiResponse = json_decode($api, true, 512, JSON_THROW_ON_ERROR);
+		assert(is_array($apiResponse));
+		$thumbnailUrl = $apiResponse['thumbnail_url'] ?? null;
+
+		return is_string($thumbnailUrl) ? $thumbnailUrl : null;
 	}
 }
