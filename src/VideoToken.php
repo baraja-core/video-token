@@ -19,8 +19,8 @@ final class VideoToken
 	public function __construct(string $token, ?string $provider = null)
 	{
 		$parser = $this->checkVideoToken(trim($token), $provider ? strtolower($provider) : null);
-		if (strlen($parser['token']) > 32) {
-			throw new \InvalidArgumentException('Video token "' . $token . '" is too long.');
+		if (mb_strlen($parser['token'], 'UTF-8') > 32) {
+			throw new \InvalidArgumentException(sprintf('Video token "%s" is too long.', $token));
 		}
 		$this->token = $parser['token'];
 		$this->provider = $parser['provider'];
@@ -48,7 +48,7 @@ final class VideoToken
 			return 'https://www.youtube.com/embed/' . urlencode($this->token) . '?rel=0';
 		}
 
-		throw new \LogicException('Provider "' . $this->provider . '" is not supported.');
+		throw new \LogicException(sprintf('Provider "%s" is not supported.', $this->provider));
 	}
 
 
@@ -58,13 +58,10 @@ final class VideoToken
 			return 'https://img.youtube.com/vi/' . urlencode($this->token) . '/maxresdefault.jpg';
 		}
 		if ($this->provider === self::PROVIDER_VIMEO) {
-			$api = trim(
-				(string) @file_get_contents(
-					'https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/' . urlencode($this->token)
-				)
-			);
+			$url = 'https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/' . urlencode($this->token);
+			$api = trim((string) @file_get_contents($url));
 
-			return json_decode($api, true)['thumbnail_url'] ?? null;
+			return json_decode($api, true, 512, JSON_THROW_ON_ERROR)['thumbnail_url'] ?? null;
 		}
 
 		return null;
@@ -144,7 +141,7 @@ final class VideoToken
 				$parsedProvider = self::PROVIDER_VIMEO;
 				$parsedToken = (string) $vimeoParser['token'];
 			} else {
-				throw new \InvalidArgumentException('Token or URL "' . $token . '" is invalid.');
+				throw new \InvalidArgumentException(sprintf('Token or URL "%s" is invalid.', $token));
 			}
 		}
 		if (preg_match('/embed\/([a-zA-Z0-9\-_]{11})"/', $token, $youTubeEmbed) === 1) {
@@ -152,7 +149,7 @@ final class VideoToken
 			$parsedToken = (string) $youTubeEmbed[1];
 		}
 		if ($parsedProvider !== null && $parsedToken === null) { // Invalid input
-			throw new \InvalidArgumentException('Token can not be parser for "' . $parsedProvider . '" provider.');
+			throw new \InvalidArgumentException(sprintf('Token can not be parser for "%s" provider.', $parsedProvider));
 		}
 		$token = $parsedToken ?? $token;
 		$provider = $parsedProvider ?? $provider;
@@ -161,7 +158,7 @@ final class VideoToken
 			$provider = $providerHint;
 		}
 		if ($provider === null) {
-			throw new \InvalidArgumentException('Provider for token "' . $token . '" is mandatory.');
+			throw new \InvalidArgumentException(sprintf('Provider for token "%s" is mandatory.', $token));
 		}
 
 		return [
