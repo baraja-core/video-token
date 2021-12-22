@@ -184,6 +184,7 @@ final class VideoToken
 		return null;
 	}
 
+
 	private function downloadVimeoThumbnail(string $token): ?string
 	{
 		$url = 'https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/' . urlencode($token);
