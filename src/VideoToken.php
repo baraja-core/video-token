@@ -91,7 +91,7 @@ final class VideoToken
 			preg_match(
 				'/^(?:watch\?v=|v\/|embed\/|ytscreeningroom\?v=|\?v=|\?vi=|e\/|watch\?.*vi?=|\?feature=[a-z_]*&v=|vi\/)([a-zA-Z0-9\-_]{11})/',
 				$url,
-				$regularMatch
+				$regularMatch,
 			) === 1
 		) { // 3.
 			return $regularMatch[1] ?? null;
