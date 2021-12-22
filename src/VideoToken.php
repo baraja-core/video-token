@@ -18,7 +18,7 @@ final class VideoToken
 
 	public function __construct(string $token, ?string $provider = null)
 	{
-		$parser = $this->checkVideoToken(trim($token), $provider ? strtolower($provider) : null);
+		$parser = $this->checkVideoToken(trim($token), $provider !== null ? strtolower($provider) : null);
 		if (mb_strlen($parser['token'], 'UTF-8') > 32) {
 			throw new \InvalidArgumentException(sprintf('Video token "%s" is too long.', $token));
 		}
@@ -60,8 +60,11 @@ final class VideoToken
 		if ($this->provider === self::PROVIDER_VIMEO) {
 			$url = 'https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/' . urlencode($this->token);
 			$api = trim((string) @file_get_contents($url));
-
-			return json_decode($api, true, 512, JSON_THROW_ON_ERROR)['thumbnail_url'] ?? null;
+			$apiResponse = json_decode($api, true, 512, JSON_THROW_ON_ERROR);
+			$thumbnailUrl = is_array($apiResponse) && isset($apiResponse['thumbnail_url']) ? $apiResponse['thumbnail_url'] : null;
+			if (is_string($thumbnailUrl)) {
+				return $thumbnailUrl;
+			}
 		}
 
 		return null;
