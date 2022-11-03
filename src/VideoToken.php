@@ -140,14 +140,14 @@ final class VideoToken
 				) === 1
 			) {
 				$parsedProvider = self::PROVIDER_VIMEO;
-				$parsedToken = (string) $vimeoParser['token'];
+				$parsedToken = $vimeoParser['token'];
 			} else {
 				throw new \InvalidArgumentException(sprintf('Token or URL "%s" is invalid.', $token));
 			}
 		}
 		if (preg_match('/embed\/([a-zA-Z0-9\-_]{11})"/', $token, $youTubeEmbed) === 1) {
 			$parsedProvider = self::PROVIDER_YOUTUBE;
-			$parsedToken = (string) $youTubeEmbed[1];
+			$parsedToken = $youTubeEmbed[1];
 		}
 		if ($parsedProvider !== null && $parsedToken === null) { // Invalid input
 			throw new \InvalidArgumentException(sprintf('Token can not be parser for "%s" provider.', $parsedProvider));
